@@ -4,6 +4,8 @@ const tslib_1 = require("tslib");
 const models_1 = require("../models");
 const express_1 = require("express");
 const argon2 = tslib_1.__importStar(require("argon2"));
+const crypto_1 = tslib_1.__importDefault(require("crypto"));
+const nodemailer = require("nodemailer");
 const userRouter = (0, express_1.Router)();
 userRouter.get("/session", async (req, res) => {
     if (req.session.user)
@@ -86,6 +88,89 @@ userRouter.get("/getUser", async (req, res) => {
     }
     catch (err) {
         res.send({ message: err, status: "500" });
+    }
+});
+userRouter.post("/forgot-password", async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).send({ message: "Email is required" });
+    }
+    try {
+        const user = await models_1.User.findOne({ email });
+        if (!user) {
+            return res.status(200).send({ message: "If this email is registered, a reset link has been sent" });
+        }
+        const resetToken = crypto_1.default.randomBytes(20).toString("hex");
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = new Date(Date.now() + 3600000);
+        await user.save();
+        const resetLink = `${req.headers.origin || "http://localhost:3000"}/reset-password/${resetToken}`;
+        const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: Number(process.env.EMAIL_PORT),
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+        const mailOptions = {
+            from: `"GateMate Support" <gatemate35@gmail.com>`,
+            to: email,
+            subject: "Password Reset Request",
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+          <h2 style="color: #333; text-align: center;">Password Reset Request</h2>
+          <p style="font-size: 16px; color: #555;">
+            You are receiving this because you (or someone else) have requested the reset of the password for your account.
+          </p>
+          <p style="text-align: center; margin: 20px 0;">
+            <a href="${resetLink}" 
+               style="display: inline-block; background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; font-size: 18px; border-radius: 5px;">
+              Reset Password
+            </a>
+          </p>
+          <p style="font-size: 14px; color: #777;">
+            If you did not request this, please ignore this email and your password will remain unchanged.
+          </p>
+          <p style="font-size: 14px; color: #777; text-align: center; margin-top: 20px;">
+            &copy; ${new Date().getFullYear()} GateMate
+          </p>
+        </div>
+      `,
+        };
+        await transporter.sendMail(mailOptions);
+        return res.status(200).send({
+            message: "If this email is registered, a reset link has been sent"
+        });
+    }
+    catch (err) {
+        console.error("Error during forgot-password", err);
+        return res.status(500).send({ message: "Internal server error" });
+    }
+});
+userRouter.post("/reset-password", async (req, res) => {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+        return res.status(400).send({ message: "Token and new password are required." });
+    }
+    try {
+        const user = await models_1.User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: new Date() }
+        });
+        if (!user) {
+            return res.status(400).send({ message: "Password reset token is invalid or has expired." });
+        }
+        const hashedPassword = await argon2.hash(newPassword);
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+        res.send({ message: "Password has been reset successfully." });
+    }
+    catch (error) {
+        console.error("Error in password reset:", error);
+        res.status(500).send({ message: "Internal server error." });
     }
 });
 /* Password hashing helper functions */

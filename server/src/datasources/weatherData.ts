@@ -24,6 +24,8 @@ console.log(cleanedWeather.daily[0].date, cleanedWeather.daily[0].lat, cleanedWe
 
 
 */
+import cron from 'node-cron';
+import { recordEvent } from './eventData';
 
 async function getWeather(location: string) {
   const apiKey: string = process.env.weather_api_key ?? "";
@@ -69,3 +71,27 @@ async function getWeather(location: string) {
 }
 
 export default getWeather;
+
+// Run every day at 3:03 PM
+cron.schedule('0 12 * * *', async () => {
+  console.log(`[${new Date().toISOString()}] Running scheduled weather forecast log...`);
+  try {
+    const weather = await getWeather("Fayetteville"); // or "Simsboro", etc.
+
+    if (weather?.daily?.length > 0) {
+      const today = weather?.daily[0]; // today's forecast
+      await recordEvent('WEATHER', {
+        date: new Date(today.date * 1000).toISOString(),
+        location: 'Fayetteville',
+        description: today.description,
+        temp: today.temp,
+        rain: today.rain,
+        Probability_of_Percipitation: today.pop
+      });
+    } else {
+      console.warn("No weather data to record.");
+    }
+  } catch (err) {
+    console.error("Failed to record daily weather forecast:", err);
+  }
+});

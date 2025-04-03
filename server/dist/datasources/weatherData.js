@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
 /*
 
 This file is responsible for fetching weather data from the OpenWeather API.
@@ -25,7 +27,8 @@ console.log(cleanedWeather.daily[0].date, cleanedWeather.daily[0].lat, cleanedWe
 
 
 */
-Object.defineProperty(exports, "__esModule", { value: true });
+const node_cron_1 = tslib_1.__importDefault(require("node-cron"));
+const eventData_1 = require("./eventData");
 async function getWeather(location) {
     var _a, _b, _c;
     const apiKey = (_a = process.env.weather_api_key) !== null && _a !== void 0 ? _a : "";
@@ -68,3 +71,28 @@ async function getWeather(location) {
     }
 }
 exports.default = getWeather;
+// Run every day at 3:03 PM
+node_cron_1.default.schedule('0 12 * * *', async () => {
+    var _a;
+    console.log(`[${new Date().toISOString()}] Running scheduled weather forecast log...`);
+    try {
+        const weather = await getWeather("Fayetteville"); // or "Simsboro", etc.
+        if (((_a = weather === null || weather === void 0 ? void 0 : weather.daily) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+            const today = weather === null || weather === void 0 ? void 0 : weather.daily[0]; // today's forecast
+            await (0, eventData_1.recordEvent)('WEATHER', {
+                date: new Date(today.date * 1000).toISOString(),
+                location: 'Fayetteville',
+                description: today.description,
+                temp: today.temp,
+                rain: today.rain,
+                Probability_of_Percipitation: today.pop
+            });
+        }
+        else {
+            console.warn("No weather data to record.");
+        }
+    }
+    catch (err) {
+        console.error("Failed to record daily weather forecast:", err);
+    }
+});

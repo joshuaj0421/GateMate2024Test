@@ -2,7 +2,10 @@ import { Schema, model } from "mongoose";
 import { IDailyWeather, IWeatherData, IUser, IGate, ITrafficReturn,
          IField, IDailyWeatherDoc, IWeatherDataDoc, IUserDoc, IGateDoc,
          ITrafficReturnDoc, IFieldDoc, IDailyWeatherModel, IWeatherDataModel, IUserModel,
-         IGateModel, ITrafficReturnModel, IFieldModel
+         IGateModel, ITrafficReturnModel, IFieldModel,
+         IEventDataDoc,
+         IEventData,
+         IEventDataModel
 } from "./interfaces";
 
 /*
@@ -74,6 +77,15 @@ const DailyWeatherSchema: Schema<IDailyWeatherDoc> = new Schema(
   }
 );
 
+const EventDataSchema = new Schema<IEventDataDoc>({
+  eventType: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  details: {
+    type: Object,
+    default: {}
+  }
+});
+
 // bruh
 const WeatherDataSchema = new Schema<IWeatherDataDoc>(
   {
@@ -134,6 +146,8 @@ const UserSchema = new Schema<IUserDoc>(
     email: String,
     password: String,
     fields: [FieldSchema],
+    resetPasswordToken: { type: String, required: false },
+    resetPasswordExpires: { type: Date, required: false },
   },
   {
     strict: "throw",
@@ -163,6 +177,10 @@ WeatherDataSchema.statics.buildWeatherData = (args: IWeatherData) => {
   return new WeatherData(args);
 };
 
+EventDataSchema.statics.buildEventData = (args: IEventData) => {
+  return new EventData(args);
+};
+
 UserSchema.statics.buildUser = (args: IUser) => {
   return new User(args);
 };
@@ -189,6 +207,7 @@ export const WeatherData = model<IWeatherDataDoc, IWeatherDataModel>(
   "weather_data",
   WeatherDataSchema
 );
+export const EventData = model<IEventDataDoc, IEventDataModel>("Event", EventDataSchema);
 export const User = model<IUserDoc, IUserModel>("users", UserSchema);
 export const Gate = model<IGateDoc, IGateModel>("gates", GateSchema);
 export const Field = model<IFieldDoc, IFieldModel>("fields", FieldSchema);

@@ -81,7 +81,7 @@ function Signin() {
               />
 
               {shown ? (
-                <p className="text-red-500">Invalid credintials</p>
+                <p className="text-red-500">Invalid credentials</p>
               ) : null}
             </div>
 
@@ -108,6 +108,13 @@ function Signin() {
               }}
             >
               Sign Up
+            </button>
+
+            <button
+              className="border border-solid rounded-xl p-1 hover:bg-Corp2 hover:border-Corp2"
+              onClick={() => { window.location.href = "/forgot-password"; }}
+            >
+              Forgot Password
             </button>
           </div>
         </div>

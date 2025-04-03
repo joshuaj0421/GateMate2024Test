@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TrafficReturn = exports.Field = exports.Gate = exports.User = exports.WeatherData = exports.DailyWeather = void 0;
+exports.TrafficReturn = exports.Field = exports.Gate = exports.User = exports.EventData = exports.WeatherData = exports.DailyWeather = void 0;
 const mongoose_1 = require("mongoose");
 /*
 * IF YOU WANT TO ADD A TYPE:
@@ -65,6 +65,14 @@ const DailyWeatherSchema = new mongoose_1.Schema({
     strict: "throw",
     strictQuery: false,
 });
+const EventDataSchema = new mongoose_1.Schema({
+    eventType: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+    details: {
+        type: Object,
+        default: {}
+    }
+});
 // bruh
 const WeatherDataSchema = new mongoose_1.Schema({
     presentDay: { weather: DailyWeatherSchema, },
@@ -112,6 +120,8 @@ const UserSchema = new mongoose_1.Schema({
     email: String,
     password: String,
     fields: [FieldSchema],
+    resetPasswordToken: { type: String, required: false },
+    resetPasswordExpires: { type: Date, required: false },
 }, {
     strict: "throw",
     strictQuery: false,
@@ -131,6 +141,9 @@ DailyWeatherSchema.statics.buildDailyWeather = (args) => {
 WeatherDataSchema.statics.buildWeatherData = (args) => {
     return new exports.WeatherData(args);
 };
+EventDataSchema.statics.buildEventData = (args) => {
+    return new exports.EventData(args);
+};
 UserSchema.statics.buildUser = (args) => {
     return new exports.User(args);
 };
@@ -146,6 +159,7 @@ TrafficReturnSchema.statics.buildTrafficReturn = (args) => {
 //* Model Instantiations
 exports.DailyWeather = (0, mongoose_1.model)("daily_weather", DailyWeatherSchema);
 exports.WeatherData = (0, mongoose_1.model)("weather_data", WeatherDataSchema);
+exports.EventData = (0, mongoose_1.model)("Event", EventDataSchema);
 exports.User = (0, mongoose_1.model)("users", UserSchema);
 exports.Gate = (0, mongoose_1.model)("gates", GateSchema);
 exports.Field = (0, mongoose_1.model)("fields", FieldSchema);

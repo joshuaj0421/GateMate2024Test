@@ -4,7 +4,6 @@ const tslib_1 = require("tslib");
 const express_1 = require("express");
 const traffic_1 = tslib_1.__importDefault(require("../datasources/traffic"));
 const models_1 = require("../models");
-const emailService_1 = require("../utils/emailService");
 const trafficRouter = (0, express_1.Router)();
 trafficRouter.get("/gen1", async (req, res) => {
     var _a;
@@ -25,12 +24,17 @@ trafficRouter.get("/gen1", async (req, res) => {
                 // Check each gate's status and send alerts if critical
                 field.Gates.forEach(async (gate) => {
                     if (gate.status === "Red") {
-                        try {
-                            await (0, emailService_1.sendCriticalGateAlert)(email, gate.gateId, gate.status, gate.actualWaterLevel, gate.idealWaterLevel);
-                        }
-                        catch (error) {
-                            console.error(`Failed to send alert for gate ${gate.gateId}:`, error);
-                        }
+                        // try {
+                        //   await sendCriticalGateAlert(
+                        //     email,
+                        //     gate.gateId,
+                        //     gate.status,
+                        //     gate.actualWaterLevel,
+                        //     gate.idealWaterLevel
+                        //   );
+                        // } catch (error) {
+                        //   console.error(`Failed to send alert for gate ${gate.gateId}:`, error);
+                        // }
                     }
                 });
             }

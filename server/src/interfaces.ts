@@ -64,6 +64,17 @@ export interface IDailyWeather {
   uvi: number;
 }
 
+export interface IEventData {
+  eventType: string;  
+  timestamp: Date;
+  details: {
+    temperature?: number;
+    waterLevel?: number;
+    battery?: number;
+    [key: string]: any;
+  };
+}
+
 export interface IWeatherData {
   presentDay: { weather: IDailyWeather; };
   day1: { weather: IDailyWeather; };
@@ -81,6 +92,8 @@ export interface IUser {
   email: string;
   password: string;
   fields: IField[];
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 export interface ISessionUser {
@@ -118,6 +131,7 @@ export interface IUserDoc extends IUser, Document { }
 export interface IGateDoc extends IGate, Document { }
 export interface ITrafficReturnDoc extends ITrafficReturn, Document { }
 export interface IFieldDoc extends IField, Document { }
+export interface IEventDataDoc extends IEventData, Document { }
 
 // * Model Definitions and declaration of builder methods
 
@@ -127,6 +141,10 @@ export interface IDailyWeatherModel extends Model<IDailyWeatherDoc> {
 
 export interface IWeatherDataModel extends Model<IWeatherDataDoc> {
   buildWeatherData(args: IWeatherData): IWeatherDataDoc;
+}
+
+export interface IEventDataModel extends Model<IEventDataDoc> {
+  buildEventData(args: IEventData): IEventDataDoc;
 }
 
 export interface IUserModel extends Model<IUserDoc> {

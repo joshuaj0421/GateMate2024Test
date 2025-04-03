@@ -24,17 +24,17 @@ trafficRouter.get("/gen1", async (req, res) => {
         // Check each gate's status and send alerts if critical
         field.Gates.forEach(async (gate) => {
           if (gate.status === "Red") {
-            try {
-              await sendCriticalGateAlert(
-                email,
-                gate.gateId,
-                gate.status,
-                gate.actualWaterLevel,
-                gate.idealWaterLevel
-              );
-            } catch (error) {
-              console.error(`Failed to send alert for gate ${gate.gateId}:`, error);
-            }
+            // try {
+            //   await sendCriticalGateAlert(
+            //     email,
+            //     gate.gateId,
+            //     gate.status,
+            //     gate.actualWaterLevel,
+            //     gate.idealWaterLevel
+            //   );
+            // } catch (error) {
+            //   console.error(`Failed to send alert for gate ${gate.gateId}:`, error);
+            // }
           }
         });
       }

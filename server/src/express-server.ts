@@ -1,5 +1,6 @@
 import express from "express";
 import homeRouter from "./controllers/weatherController";
+import exportRouter from "./utils/pdfExport";
 import gateRouter from "./controllers/gateController";
 import dotenv from "dotenv";
 dotenv.config();
@@ -33,6 +34,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/gate", gateRouter);
 app.use("/api/v1/field", fieldRouter);
 app.use("/api/v1/traffic", trafficRouter);
+app.use('/api/v1/export', exportRouter);
 
 // Start the server
 app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));

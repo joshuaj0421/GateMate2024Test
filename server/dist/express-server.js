@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const express_1 = tslib_1.__importDefault(require("express"));
 const weatherController_1 = tslib_1.__importDefault(require("./controllers/weatherController"));
+const pdfExport_1 = tslib_1.__importDefault(require("./utils/pdfExport"));
 const gateController_1 = tslib_1.__importDefault(require("./controllers/gateController"));
 const dotenv_1 = tslib_1.__importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -29,5 +30,6 @@ app.use("/api/v1/user", userController_1.default);
 app.use("/api/v1/gate", gateController_1.default);
 app.use("/api/v1/field", fieldController_1.default);
 app.use("/api/v1/traffic", trafficController_1.default);
+app.use('/api/v1/export', pdfExport_1.default);
 // Start the server
 app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
